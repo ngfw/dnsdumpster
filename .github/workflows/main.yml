@@ -12,34 +12,49 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-                os: [ubuntu-latest, windows-latest]
-                php: [7.4, 8.0]
-                laravel: [8.*]
-                stability: [prefer-lowest, prefer-stable]
+                os: [ubuntu-latest]
+                php: [8.1]
+                laravel: [11.*]
+                stability: [prefer-stable]
                 include:
-                    - laravel: 8.*
-                      testbench: ^6.6
+                    - laravel: 11.*
+                      testbench: ^9.0
 
-        name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
+        name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
         steps:
+            - name: Set up environment variable
+              run: echo "DNSDUMPSTER_API_KEY=${{ secrets.DNSDUMPSTER_API_KEY }}" >> $GITHUB_ENV
+
             - name: Checkout code
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                   php-version: ${{ matrix.php }}
-                  extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
+                  extensions: bcmath, curl, dom, exif, fileinfo, gd, iconv, imagick, intl, libxml, mbstring, pcntl, pdo, pdo_sqlite, soap, sqlite, zip
                   coverage: none
+                  tools: composer:v2
 
-            - name: Setup problem matchers
+            - name: Setup Problem Matchers
               run: |
                   echo "::add-matcher::${{ runner.tool_cache }}/php.json"
                   echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
-            - name: Install dependencies
+
+            - name: Cache Composer packages
+              id: composer-cache
+              uses: actions/cache@v3
+              with:
+                  path: vendor
+                  key: ${{ runner.os }}-php-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-${{ matrix.php }}-
+
+            - name: Install Dependencies
               run: |
                   composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
-                  composer update --${{ matrix.stability }} --prefer-dist --no-interaction
-            - name: Execute tests
-              run: vendor/bin/phpunit
+                  composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
+
+            - name: Run Test Suite
+              run: vendor/bin/phpunit --verbose --colors=always
