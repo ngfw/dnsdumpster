@@ -1,0 +1,53 @@
+{
+    "name": "ngfw/dnsdumpster",
+    "description": "A Laravel package to fetch DNS reconnaissance data from the DNSDumpster API, easily installable via Composer and configurable as a service provider.",
+    "keywords": [
+        "ngfw",
+        "DNSDumpster"
+    ],
+    "homepage": "https://github.com/ngfw/dnsdumpster",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Nick Gejadze",
+            "email": "gejadze@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.0",
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ngfw\\DNSDumpster\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ngfw\\DNSDumpster\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ngfw\\DNSDumpster\\DNSDumpsterServiceProvider"
+            ],
+            "aliases": {
+                "DNSDumpster": "Ngfw\\DNSDumpster\\DNSDumpsterFacade"
+            }
+        }
+    }
+}
