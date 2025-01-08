@@ -57,4 +57,4 @@ jobs:
                   composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
             - name: Run Test Suite
-              run: vendor/bin/phpunit --verbose --colors=always
+              run: vendor/bin/phpunit tests/ --colors=always 
