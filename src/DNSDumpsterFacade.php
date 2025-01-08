@@ -1,4 +1,5 @@
 <?php
+
 namespace Ngfw\DNSDumpster;
 
 use Illuminate\Support\Facades\Facade;
@@ -8,9 +9,10 @@ use Illuminate\Support\Facades\Facade;
  * A wrapper for the DNSDumpster API with rate limiting and retry mechanisms.
  * Provides secure and efficient access to DNS reconnaissance data.
  *
- * @package Ngfw\DNSDumpster
  * @author Nick Gejadze
+ *
  * @version 1.1
+ *
  * @license MIT
  */
 class DNSDumpsterFacade extends Facade
