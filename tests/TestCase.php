@@ -2,12 +2,11 @@
 
 namespace Ngfw\DNSDumpster\Tests;
 
-use Orchestra\Testbench\TestCase as BaseTestCase;
 use Ngfw\DNSDumpster\DNSDumpsterServiceProvider;
+use Orchestra\Testbench\TestCase as BaseTestCase;
 
 /**
- * Class TestCase
- * @package Ngfw\DNSDumpster\Tests
+ * Class TestCase.
  */
 class TestCase extends BaseTestCase
 {

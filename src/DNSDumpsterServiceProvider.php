@@ -1,16 +1,18 @@
 <?php
+
 namespace Ngfw\DNSDumpster;
 
-use Ngfw\DNSDumpster\DNSDumpster;
 use Illuminate\Support\ServiceProvider;
+
 /**
  * Class DNSDumpsterServiceProvider
  * A wrapper for the DNSDumpster API with rate limiting and retry mechanisms.
  * Provides secure and efficient access to DNS reconnaissance data.
  *
- * @package Ngfw\DNSDumpster
  * @author Nick Gejadze
+ *
  * @version 1.1
+ *
  * @license MIT
  */
 class DNSDumpsterServiceProvider extends ServiceProvider
@@ -60,6 +62,6 @@ class DNSDumpsterServiceProvider extends ServiceProvider
      */
     private function getConfigPath(): string
     {
-        return __DIR__ . '/../config/config.php';
+        return __DIR__.'/../config/config.php';
     }
 }
