@@ -1,20 +1,22 @@
 <?php
+
 namespace Ngfw\DNSDumpster;
 
 use Exception;
-use InvalidArgumentException;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Http;
+use InvalidArgumentException;
 
 /**
  * Class DNSDumpster
  * A wrapper for the DNSDumpster API with rate limiting and retry mechanisms.
  * Provides secure and efficient access to DNS reconnaissance data.
  *
- * @package Ngfw\DNSDumpster
  * @author Nick Gejadze
+ *
  * @version 1.1
+ *
  * @license MIT
  */
 class DNSDumpster
@@ -31,7 +33,7 @@ class DNSDumpster
     /**
      * Initializes the DNSDumpster instance with the provided options.
      *
-     * @param array $options An associative array containing the API key and URL configuration.
+     * @param  array  $options  An associative array containing the API key and URL configuration.
      */
     public function __construct(array $options)
     {
@@ -59,9 +61,8 @@ class DNSDumpster
      * based on the provided options array. The API key is trimmed, and the API URL
      * has any trailing slash removed.
      *
-     * @param array $options An associative array containing the API key and URL configuration.
+     * @param  array  $options  An associative array containing the API key and URL configuration.
      */
-    
     private function initialize(array $options): void
     {
         $this->apiKey = trim($options['DNSDumpster_API_KEY']);
@@ -69,11 +70,12 @@ class DNSDumpster
     }
 
     /**
-     * Retrieve domain information from DNSDumpster API
+     * Retrieve domain information from DNSDumpster API.
      *
-     * @param string $domain The domain to lookup
-     * @param int $page Page number for paginated results (default: 1)
+     * @param  string  $domain  The domain to lookup
+     * @param  int  $page  Page number for paginated results (default: 1)
      * @return array The domain information
+     *
      * @throws InvalidArgumentException If domain is invalid
      * @throws Exception If API request fails or rate limit is exceeded
      */
@@ -88,7 +90,7 @@ class DNSDumpster
 
         $data = $this->makeApiRequest($domain, $page);
         $this->updateRateLimit();
-        
+
         return $data;
     }
 
@@ -98,16 +100,16 @@ class DNSDumpster
      * This private method checks if the given domain string is not empty and is a valid domain name.
      * If the domain is invalid, an InvalidArgumentException is thrown.
      *
-     * @param string $domain The domain to validate.
+     * @param  string  $domain  The domain to validate.
+     *
      * @throws InvalidArgumentException If the domain is invalid.
      */
     private function validateDomain(string $domain): void
     {
-        if (empty($domain) || !filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+        if (empty($domain) || ! filter_var($domain, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
             throw new InvalidArgumentException('Invalid domain provided');
         }
     }
-
 
     /**
      * Makes an API request to the DNSDumpster service to retrieve domain information.
@@ -116,9 +118,10 @@ class DNSDumpster
      * and handles any errors that may occur during the request. If the request is successful, the
      * response data is returned as an array.
      *
-     * @param string $domain The domain to look up.
-     * @param int $page The page number for paginated results.
+     * @param  string  $domain  The domain to look up.
+     * @param  int  $page  The page number for paginated results.
      * @return array The domain information retrieved from the API.
+     *
      * @throws Exception If the API request fails or the rate limit is exceeded.
      */
     private function makeApiRequest(string $domain, int $page): array
@@ -128,11 +131,11 @@ class DNSDumpster
 
             $response = Http::withHeaders([
                 'X-API-Key' => $this->apiKey,
-                'Accept' => 'application/json'
+                'Accept' => 'application/json',
             ])
                 ->timeout(self::REQUEST_TIMEOUT)
                 ->retry(self::RETRY_ATTEMPTS, self::RETRY_DELAY, function ($exception) {
-                    return $exception instanceof ConnectionException || 
+                    return $exception instanceof ConnectionException ||
                            $exception instanceof RequestException;
                 })
                 ->get($url);
@@ -145,8 +148,8 @@ class DNSDumpster
                     throw new Exception('Rate limit exceeded');
                 }
 
-                throw new Exception(sprintf('API request failed with status %d: %s', 
-                    $statusCode, 
+                throw new Exception(sprintf('API request failed with status %d: %s',
+                    $statusCode,
                     $errorMessage
                 ));
             }

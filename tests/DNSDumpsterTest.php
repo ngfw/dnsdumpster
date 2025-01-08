@@ -2,15 +2,14 @@
 
 namespace Ngfw\DNSDumpster\Tests;
 
-use Ngfw\DNSDumpster\DNSDumpster;
-use Illuminate\Support\Facades\Http;
-use Orchestra\Testbench\TestCase;
-use InvalidArgumentException;
 use Exception;
+use Illuminate\Support\Facades\Http;
+use InvalidArgumentException;
+use Ngfw\DNSDumpster\DNSDumpster;
+use Orchestra\Testbench\TestCase;
 
 /**
- * Class DNSDumpsterTest
- * @package Ngfw\DNSDumpster\Tests
+ * Class DNSDumpsterTest.
  */
 class DNSDumpsterTest extends TestCase
 {
@@ -37,8 +36,8 @@ class DNSDumpsterTest extends TestCase
         Http::fake([
             'https://api.dnsdumpster.com/domain/google.com*' => Http::response([
                 'domain' => 'google.com',
-                'data' => ['mocked data']
-            ], 200)
+                'data' => ['mocked data'],
+            ], 200),
         ]);
 
         $dnsDumpster = new DNSDumpster(config('DNSDumpster'));
@@ -78,8 +77,8 @@ class DNSDumpsterTest extends TestCase
         // Mock the API failure (e.g., rate limit exceeded)
         Http::fake([
             'https://api.dnsdumpster.com/domain/google.com*' => Http::response([
-                'error' => 'Rate limit exceeded'
-            ], 429)
+                'error' => 'Rate limit exceeded',
+            ], 429),
         ]);
 
         $dnsDumpster = new DNSDumpster(config('DNSDumpster'));
