@@ -4,7 +4,7 @@ A Laravel package for fetching and managing DNS reconnaissance data using the DN
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/ngfw/DNSDumpster.svg?style=flat-square)](https://packagist.org/packages/ngfw/DNSDumpster)  
 [![Total Downloads](https://img.shields.io/packagist/dt/ngfw/DNSDumpster.svg?style=flat-square)](https://packagist.org/packages/ngfw/DNSDumpster)  
-
+[![StyleCI](https://styleci.io/repos/913631740/shield?branch=main)](https://styleci.io/repos/913631740)
 
 ## Installation
 
