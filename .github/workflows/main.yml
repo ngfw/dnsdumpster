@@ -10,15 +10,20 @@ jobs:
     test:
         runs-on: ${{ matrix.os }}
         strategy:
-            fail-fast: true
+            fail-fast: false
             matrix:
                 os: [ubuntu-latest]
-                php: [8.2]
-                laravel: [11.*]
+                php: [8.1, 8.2, 8.3]
+                laravel: [10.*, 11.*]
                 stability: [prefer-stable]
                 include:
+                    - laravel: 10.*
+                      testbench: ^8.0
                     - laravel: 11.*
                       testbench: ^9.0
+                exclude:
+                    - php: 8.1
+                      laravel: 11.*
 
         name: PHP ${{ matrix.php }} - Laravel ${{ matrix.laravel }} - ${{ matrix.stability }} - ${{ matrix.os }}
 
@@ -27,14 +32,14 @@ jobs:
               run: echo "DNSDUMPSTER_API_KEY=${{ secrets.DNSDUMPSTER_API_KEY }}" >> $GITHUB_ENV
 
             - name: Checkout code
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
                   php-version: ${{ matrix.php }}
                   extensions: bcmath, curl, dom, exif, fileinfo, gd, iconv, imagick, intl, libxml, mbstring, pcntl, pdo, pdo_sqlite, soap, sqlite, zip
-                  coverage: none
+                  coverage: xdebug
                   tools: composer:v2
 
             - name: Setup Problem Matchers
@@ -44,17 +49,55 @@ jobs:
 
             - name: Cache Composer packages
               id: composer-cache
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                   path: vendor
-                  key: ${{ runner.os }}-php-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
+                  key: ${{ runner.os }}-php-${{ matrix.php }}-laravel-${{ matrix.laravel }}-${{ hashFiles('**/composer.lock') }}
                   restore-keys: |
-                      ${{ runner.os }}-php-${{ matrix.php }}-
+                      ${{ runner.os }}-php-${{ matrix.php }}-laravel-${{ matrix.laravel }}-
 
             - name: Install Dependencies
               run: |
-                  composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+                  composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --dev --no-interaction --no-update
                   composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
 
             - name: Run Test Suite
-              run: vendor/bin/phpunit tests/ --colors=always 
+              run: vendor/bin/phpunit tests/ --colors=always --coverage-clover coverage.xml
+
+            - name: Upload Coverage to Codecov
+              if: matrix.php == '8.2' && matrix.laravel == '11.*'
+              uses: codecov/codecov-action@v4
+              with:
+                  files: ./coverage.xml
+                  fail_ci_if_error: false
+                  token: ${{ secrets.CODECOV_TOKEN }}
+
+    static-analysis:
+        runs-on: ubuntu-latest
+        name: Static Analysis (PHPStan)
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.2
+                  extensions: bcmath, curl, dom, exif, fileinfo, gd, iconv, imagick, intl, libxml, mbstring, pcntl, pdo, pdo_sqlite, soap, sqlite, zip
+                  coverage: none
+                  tools: composer:v2
+
+            - name: Cache Composer packages
+              uses: actions/cache@v4
+              with:
+                  path: vendor
+                  key: ${{ runner.os }}-php-8.2-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-php-8.2-
+
+            - name: Install Dependencies
+              run: composer install --prefer-dist --no-interaction --no-progress
+
+            - name: Run PHPStan
+              run: vendor/bin/phpstan analyse --memory-limit=2G 

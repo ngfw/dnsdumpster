@@ -23,6 +23,7 @@ class DNSDumpsterServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishConfig();
+        $this->registerCommands();
     }
 
     /**
@@ -63,5 +64,17 @@ class DNSDumpsterServiceProvider extends ServiceProvider
     private function getConfigPath(): string
     {
         return __DIR__.'/../config/config.php';
+    }
+
+    /**
+     * Register console commands.
+     */
+    private function registerCommands(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Console\DNSDumpsterLookupCommand::class,
+            ]);
+        }
     }
 }
